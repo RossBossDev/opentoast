@@ -56,6 +56,8 @@ export interface SlackUsersTable {
 	workspace_id: string;
 	slack_user_id: string;
 	name: string | null;
+	github_login: string | null;
+	github_user_id: string | null;
 	created_at: Timestamp;
 	updated_at: Timestamp;
 }

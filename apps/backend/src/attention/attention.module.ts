@@ -6,6 +6,6 @@ import { AttentionRepository } from "./attention-repository";
 @Module({
 	imports: [DatabaseModule],
 	providers: [AttentionRepository, AttentionEngineService],
-	exports: [AttentionEngineService],
+	exports: [AttentionRepository, AttentionEngineService],
 })
 export class AttentionModule {}
