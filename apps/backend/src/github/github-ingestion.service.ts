@@ -1,5 +1,6 @@
 import { EventEmitter } from "node:events";
-import { Inject, Injectable } from "@nestjs/common";
+import { Inject, Injectable, Optional } from "@nestjs/common";
+import { AttentionEngineService } from "../attention/attention-engine.service";
 import type {
 	GithubIngestionResult,
 	GithubNormalizedFact,
@@ -23,6 +24,9 @@ export class GithubIngestionService {
 		private readonly snapshots: GithubPrSnapshotService,
 		@Inject(GithubNormalizer)
 		private readonly normalizer: GithubNormalizer,
+		@Optional()
+		@Inject(AttentionEngineService)
+		private readonly attention?: AttentionEngineService,
 	) {}
 
 	async ingest(
@@ -52,6 +56,7 @@ export class GithubIngestionService {
 			repositoryId: snapshot.repositoryId,
 		});
 
+		await this.attention?.processFacts(facts);
 		this.publishFacts(facts);
 
 		return { deliveryId: headers.deliveryId, duplicate: false, facts };

@@ -109,10 +109,14 @@ export interface AttentionItemsTable {
 	pull_request_id: string;
 	attention_type: string;
 	assignee_github_user_id: string | null;
+	assignee_github_login: string | null;
 	reason: string;
 	status: string;
 	detected_at: Timestamp;
+	last_relevant_activity_at: Timestamp | null;
 	resolved_at: Timestamp | null;
+	acknowledged_at: Timestamp | null;
+	dedupe_key: string | null;
 	created_at: Timestamp;
 	updated_at: Timestamp;
 }

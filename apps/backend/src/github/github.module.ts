@@ -1,4 +1,5 @@
 import { Module } from "@nestjs/common";
+import { AttentionModule } from "../attention/attention.module";
 import { DatabaseModule } from "../database/database.module";
 import { GithubController } from "./github.controller";
 import { GithubEventStore } from "./github-event-store";
@@ -9,7 +10,7 @@ import { GithubReconciliationService } from "./github-reconciliation.service";
 import { GithubWebhookVerifier } from "./github-webhook-verifier";
 
 @Module({
-	imports: [DatabaseModule],
+	imports: [DatabaseModule, AttentionModule],
 	controllers: [GithubController],
 	providers: [
 		GithubWebhookVerifier,
