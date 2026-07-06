@@ -7,4 +7,6 @@ coverage/
 apps/backend/.env
 apps/backend/dist/
 apps/backend/coverage/
+apps/docs/.vitepress/cache/
+apps/docs/.vitepress/dist/
 .DS_Store

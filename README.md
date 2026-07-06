@@ -2,6 +2,8 @@
 
 OpenToast is a NestJS API and worker service for tracking GitHub pull request attention and delivering Slack reminders/digests.
 
+Product documentation: https://rossbossdev.github.io/opentoast/
+
 ## Prerequisites
 
 - Node.js 24.18.0 (`nvm use`)
