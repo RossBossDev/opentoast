@@ -1,16 +1,18 @@
 import { defineConfig } from "vitepress";
 
+const base = "/review-radar/";
+
 export default defineConfig({
-	base: "/review-radar/",
+	base,
 	title: "Review Radar",
 	description: "Spot what needs your attention in GitHub pull requests.",
-	head: [
-		[
-			"link",
-			{ rel: "icon", href: "/review-radar/brand/review-radar-icon.svg" },
-		],
-	],
+	head: [["link", { rel: "icon", href: `${base}brand/review-radar-icon.svg` }]],
 	themeConfig: {
+		logo: {
+			light: "/brand/review-radar-lockup-horizontal.svg",
+			dark: "/brand/review-radar-lockup-horizontal.svg",
+			alt: "Review Radar",
+		},
 		nav: [
 			{ text: "Getting Started", link: "/getting-started" },
 			{ text: "Concepts", link: "/concepts" },

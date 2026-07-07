@@ -6,8 +6,8 @@ hero:
   text: Personal pull request attention for GitHub and Slack
   tagline: Spot what needs your attention.
   image:
-    src: /review-radar/brand/review-radar-lockup-horizontal.svg
-    alt: Review Radar logo
+    src: /brand/review-radar-icon.svg
+    alt: Review Radar icon
   actions:
     - theme: brand
       text: Get Started
