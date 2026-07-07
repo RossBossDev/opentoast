@@ -93,9 +93,22 @@ export interface AttentionQueryItem {
 	updatedAt: Date;
 }
 
+export interface AttentionDigestDeliveryItem extends AttentionQueryItem {
+	repositoryFullName: string;
+	pullRequestNumber: number;
+	pullRequestTitle: string;
+	pullRequestUrl: string;
+}
+
 export interface AttentionDigestGroup {
 	githubUserLogin: string;
-	items: AttentionQueryItem[];
+	items: AttentionDigestDeliveryItem[];
+}
+
+export interface StaleReminderCandidate extends AttentionQueryItem {
+	pullRequestState: string;
+	pullRequestDraft: boolean;
+	lastReminderDeliveredAt: Date | null;
 }
 
 export interface AttentionFactProcessingResult {

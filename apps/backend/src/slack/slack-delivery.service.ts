@@ -1,8 +1,12 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { type Kysely, sql } from "kysely";
-import type { AttentionQueryItem } from "../attention/attention.types";
+import type {
+	AttentionDigestDeliveryItem,
+	AttentionQueryItem,
+} from "../attention/attention.types";
 import { KYSELY_DB } from "../database/database.tokens";
 import type { Database } from "../database/database.types";
+import { DigestBuilder } from "../notifications/digest-builder";
 import type { SlackMessageContext } from "./slack.types";
 import { SlackHttpClient } from "./slack-http-client";
 import { SlackMessageBuilder } from "./slack-message-builder";
@@ -20,14 +24,64 @@ export class SlackDeliveryService {
 		@Inject(KYSELY_DB) private readonly db: Kysely<Database>,
 		@Inject(SlackUserLinkService) private readonly links: SlackUserLinkService,
 		@Inject(SlackMessageBuilder) private readonly messages: SlackMessageBuilder,
+		@Inject(DigestBuilder) private readonly digests: DigestBuilder,
 		@Inject(SlackHttpClient) private readonly slack: SlackHttpClient,
 	) {}
+
+	async deliverDigest(params: {
+		githubUserLogin: string;
+		items: AttentionDigestDeliveryItem[];
+		bucket: string;
+	}): Promise<SlackDeliveryStatus> {
+		const message = this.digests.build(params.items);
+		if (!message) {
+			return "duplicate";
+		}
+
+		const link = await this.links.findByGithubLogin(params.githubUserLogin);
+		const dedupeKey = `daily_digest:${params.githubUserLogin}:${params.bucket}`;
+		if (!link) {
+			await this.recordDelivery({
+				dedupeKey,
+				deliveryType: "daily_digest",
+				status: "skipped_unlinked",
+				errorMessage: "No linked Slack user for digest assignee",
+			});
+			return "skipped_unlinked";
+		}
+
+		const inserted = await this.insertPendingDelivery({
+			workspaceId: link.workspaceId,
+			slackUserPk: link.slackUserPk,
+			dedupeKey,
+			deliveryType: "daily_digest",
+		});
+		if (!inserted) {
+			return "duplicate";
+		}
+
+		try {
+			const result = await this.slack.postMessage({
+				channel: link.slackUserId,
+				...message,
+			});
+			await this.markDeliveryDelivered(
+				dedupeKey,
+				result.channel ?? link.slackUserId,
+			);
+			return "delivered";
+		} catch (error) {
+			await this.markDeliveryFailed(dedupeKey, error);
+			return "failed";
+		}
+	}
 
 	async deliverAttentionItem(
 		item: AttentionQueryItem,
 		deliveryType = "dm",
+		dedupeBucket = item.updatedAt.toISOString(),
 	): Promise<SlackDeliveryStatus> {
-		const dedupeKey = `${item.id}:${deliveryType}:${item.updatedAt.toISOString()}`;
+		const dedupeKey = `${item.id}:${deliveryType}:${dedupeBucket}`;
 		const link = item.assigneeLogin
 			? await this.links.findByGithubLogin(item.assigneeLogin)
 			: undefined;
@@ -60,30 +114,13 @@ export class SlackDeliveryService {
 				channel: link.slackUserId,
 				...message,
 			});
-			await this.db
-				.updateTable("deliveries")
-				.set({
-					status: "delivered",
-					channel_id: result.channel ?? link.slackUserId,
-					delivered_at: new Date(),
-					updated_at: sql`now()`,
-				})
-				.where("dedupe_key", "=", dedupeKey)
-				.execute();
+			await this.markDeliveryDelivered(
+				dedupeKey,
+				result.channel ?? link.slackUserId,
+			);
 			return "delivered";
 		} catch (error) {
-			await this.db
-				.updateTable("deliveries")
-				.set({
-					status: "failed",
-					error_message:
-						error instanceof Error
-							? error.message
-							: "Unknown Slack delivery failure",
-					updated_at: sql`now()`,
-				})
-				.where("dedupe_key", "=", dedupeKey)
-				.execute();
+			await this.markDeliveryFailed(dedupeKey, error);
 			return "failed";
 		}
 	}
@@ -127,7 +164,7 @@ export class SlackDeliveryService {
 	}
 
 	private async insertPendingDelivery(params: {
-		attentionItemId: string;
+		attentionItemId?: string;
 		workspaceId: string;
 		slackUserPk: string;
 		dedupeKey: string;
@@ -136,7 +173,7 @@ export class SlackDeliveryService {
 		const row = await this.db
 			.insertInto("deliveries")
 			.values({
-				attention_item_id: params.attentionItemId,
+				attention_item_id: params.attentionItemId ?? null,
 				workspace_id: params.workspaceId,
 				slack_user_id: params.slackUserPk,
 				dedupe_key: params.dedupeKey,
@@ -155,16 +192,66 @@ export class SlackDeliveryService {
 		deliveryType: string,
 		message: string,
 	): Promise<void> {
+		await this.recordDelivery({
+			attentionItemId,
+			dedupeKey,
+			deliveryType,
+			status: "skipped_unlinked",
+			errorMessage: message,
+		});
+	}
+
+	private async recordDelivery(params: {
+		attentionItemId?: string;
+		dedupeKey: string;
+		deliveryType: string;
+		status: string;
+		errorMessage?: string;
+	}): Promise<void> {
 		await this.db
 			.insertInto("deliveries")
 			.values({
-				attention_item_id: attentionItemId,
-				dedupe_key: dedupeKey,
-				delivery_type: deliveryType,
-				status: "skipped_unlinked",
-				error_message: message,
+				attention_item_id: params.attentionItemId ?? null,
+				dedupe_key: params.dedupeKey,
+				delivery_type: params.deliveryType,
+				status: params.status,
+				error_message: params.errorMessage ?? null,
 			})
 			.onConflict((oc) => oc.column("dedupe_key").doNothing())
+			.execute();
+	}
+
+	private async markDeliveryDelivered(
+		dedupeKey: string,
+		channelId: string,
+	): Promise<void> {
+		await this.db
+			.updateTable("deliveries")
+			.set({
+				status: "delivered",
+				channel_id: channelId,
+				delivered_at: new Date(),
+				updated_at: sql`now()`,
+			})
+			.where("dedupe_key", "=", dedupeKey)
+			.execute();
+	}
+
+	private async markDeliveryFailed(
+		dedupeKey: string,
+		error: unknown,
+	): Promise<void> {
+		await this.db
+			.updateTable("deliveries")
+			.set({
+				status: "failed",
+				error_message:
+					error instanceof Error
+						? error.message
+						: "Unknown Slack delivery failure",
+				updated_at: sql`now()`,
+			})
+			.where("dedupe_key", "=", dedupeKey)
 			.execute();
 	}
 }
