@@ -162,6 +162,15 @@ export class AttentionRepository {
 		await query.execute();
 	}
 
+	async findById(
+		attentionItemId: string,
+	): Promise<AttentionQueryItem | undefined> {
+		const row = await this.baseQuery()
+			.where("attention_items.id", "=", attentionItemId)
+			.executeTakeFirst();
+		return row ? toAttentionQueryItem(row) : undefined;
+	}
+
 	async listActiveByGithubUser(
 		githubUserLogin: string,
 	): Promise<AttentionQueryItem[]> {

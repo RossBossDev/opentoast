@@ -5,20 +5,23 @@ import { AppConfigModule } from "./config/config.module";
 import { DatabaseModule } from "./database/database.module";
 import { GithubModule } from "./github/github.module";
 import { HealthModule } from "./health/health.module";
+import { HeartbeatModule } from "./heartbeat/heartbeat.module";
 import { LoggerModule } from "./logger/logger.module";
-import { SchedulerModule } from "./scheduler/scheduler.module";
+import { hasApi, hasHeartbeat, resolveProcessRole } from "./queue/process-role";
 import { SlackModule } from "./slack/slack.module";
+
+const processRole = resolveProcessRole(process.env.PROCESS_ROLE);
 
 @Module({
 	imports: [
 		AppConfigModule,
 		LoggerModule,
 		DatabaseModule,
-		HealthModule,
+		...(hasApi(processRole) ? [HealthModule] : []),
 		GithubModule,
 		AttentionModule,
 		SlackModule,
-		SchedulerModule,
+		...(hasHeartbeat(processRole) ? [HeartbeatModule] : []),
 		CommonModule,
 	],
 })

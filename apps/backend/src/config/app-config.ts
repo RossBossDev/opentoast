@@ -10,6 +10,7 @@ import {
 	Min,
 	validateSync,
 } from "class-validator";
+import { PROCESS_ROLES, type ProcessRole } from "../queue/process-role";
 
 export class AppConfig {
 	@IsIn(["development", "test", "production"])
@@ -23,6 +24,12 @@ export class AppConfig {
 	@IsString()
 	@IsNotEmpty()
 	DATABASE_URL!: string;
+
+	@IsIn(PROCESS_ROLES)
+	PROCESS_ROLE: ProcessRole = "all";
+
+	@IsUrl({ protocols: ["redis", "rediss"], require_tld: false })
+	REDIS_URL = "redis://localhost:6379";
 
 	@IsUrl({ require_tld: false })
 	APP_BASE_URL!: string;
