@@ -1,18 +1,21 @@
 import { defineConfig } from "vitepress";
 
 export default defineConfig({
-	base: "/opentoast/",
+	base: "/review-radar/",
 	title: "Review Radar",
 	description: "Spot what needs your attention in GitHub pull requests.",
 	head: [
-		["link", { rel: "icon", href: "/opentoast/brand/review-radar-icon.svg" }],
+		[
+			"link",
+			{ rel: "icon", href: "/review-radar/brand/review-radar-icon.svg" },
+		],
 	],
 	themeConfig: {
 		nav: [
 			{ text: "Getting Started", link: "/getting-started" },
 			{ text: "Concepts", link: "/concepts" },
 			{ text: "Self-hosting", link: "/advanced/self-hosting" },
-			{ text: "GitHub", link: "https://github.com/RossBossDev/opentoast" },
+			{ text: "GitHub", link: "https://github.com/RossBossDev/review-radar" },
 		],
 		sidebar: [
 			{
@@ -29,11 +32,11 @@ export default defineConfig({
 			},
 		],
 		socialLinks: [
-			{ icon: "github", link: "https://github.com/RossBossDev/opentoast" },
+			{ icon: "github", link: "https://github.com/RossBossDev/review-radar" },
 		],
 		editLink: {
 			pattern:
-				"https://github.com/RossBossDev/opentoast/edit/main/apps/docs/:path",
+				"https://github.com/RossBossDev/review-radar/edit/main/apps/docs/:path",
 			text: "Edit this page on GitHub",
 		},
 		footer: {

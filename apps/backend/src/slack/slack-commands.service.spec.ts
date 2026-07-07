@@ -12,7 +12,7 @@ const baseCommand: SlackCommandPayload = {
 	team_domain: "acme",
 	user_id: "U123",
 	user_name: "ross",
-	command: "/opentoast",
+	command: "/review-radar",
 };
 
 describe("SlackCommandsService", () => {

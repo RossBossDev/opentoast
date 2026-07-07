@@ -38,4 +38,4 @@ The intended first success moment is simple: Review Radar identifies pull reques
 
 ## Need developer setup?
 
-Developer commands, environment variables, migrations, local Docker usage, tests, and build checks live in the [repository README](https://github.com/RossBossDev/opentoast#readme).
+Developer commands, environment variables, migrations, local Docker usage, tests, and build checks live in the [repository README](https://github.com/RossBossDev/review-radar#readme).

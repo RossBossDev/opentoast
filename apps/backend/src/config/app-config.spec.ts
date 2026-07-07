@@ -4,7 +4,7 @@ import { validate } from "./app-config";
 const validConfig = {
 	NODE_ENV: "test",
 	PORT: "3000",
-	DATABASE_URL: "postgres://postgres:postgres@localhost:5432/opentoast",
+	DATABASE_URL: "postgres://postgres:postgres@localhost:5432/review-radar",
 	APP_BASE_URL: "http://localhost:3000",
 	GITHUB_APP_ID: "123",
 	GITHUB_WEBHOOK_SECRET: "secret",

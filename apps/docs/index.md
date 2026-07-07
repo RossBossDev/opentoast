@@ -6,7 +6,7 @@ hero:
   text: Personal pull request attention for GitHub and Slack
   tagline: Spot what needs your attention.
   image:
-    src: /opentoast/brand/review-radar-lockup-horizontal.svg
+    src: /review-radar/brand/review-radar-lockup-horizontal.svg
     alt: Review Radar logo
   actions:
     - theme: brand
@@ -35,4 +35,4 @@ Review Radar is for developers who want a clearer review queue and teams that wa
 
 Review Radar is early. The hosted onboarding flow is not documented yet, and parts of the product experience are still being shaped. These docs start with the product concepts and intended user journey while implementation continues.
 
-For local development, backend setup, checks, and test commands, use the [repository README](https://github.com/RossBossDev/opentoast#readme).
+For local development, backend setup, checks, and test commands, use the [repository README](https://github.com/RossBossDev/review-radar#readme).

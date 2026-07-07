@@ -48,7 +48,7 @@ export class SlackCommandsService {
 		if (!githubLogin) {
 			return {
 				response_type: "ephemeral",
-				text: "Usage: /opentoast link <github-login>",
+				text: "Usage: /review-radar link <github-login>",
 			};
 		}
 		const link = await this.links.link(command, githubLogin);
@@ -80,7 +80,7 @@ export class SlackCommandsService {
 		if (!link) {
 			return {
 				response_type: "ephemeral",
-				text: "Link your GitHub account first: /opentoast link <github-login>",
+				text: "Link your GitHub account first: /review-radar link <github-login>",
 			};
 		}
 		const items = await this.attention.listActiveByGithubUser(link.githubLogin);
@@ -93,10 +93,10 @@ export class SlackCommandsService {
 	private helpText(): string {
 		return [
 			"Review Radar commands:",
-			"/opentoast link <github-login> — link your Slack user to GitHub",
-			"/opentoast unlink — remove your link",
-			"/opentoast inbox — show active attention items",
-			"/opentoast help — show this help",
+			"/review-radar link <github-login> — link your Slack user to GitHub",
+			"/review-radar unlink — remove your link",
+			"/review-radar inbox — show active attention items",
+			"/review-radar help — show this help",
 		].join("\n");
 	}
 }

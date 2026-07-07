@@ -3,7 +3,7 @@
 Self-hosting is an advanced future path for teams that want to run Review Radar themselves.
 
 ::: warning Outline in progress
-This page is a product-facing outline. Detailed developer commands, local environment setup, migrations, checks, and Docker instructions currently live in the [repository README](https://github.com/RossBossDev/opentoast#readme).
+This page is a product-facing outline. Detailed developer commands, local environment setup, migrations, checks, and Docker instructions currently live in the [repository README](https://github.com/RossBossDev/review-radar#readme).
 :::
 
 ## Who self-hosting is for
@@ -33,4 +33,4 @@ Future documentation should cover migrations, scheduled or background work, deli
 
 ## Developer setup
 
-If you are trying to run or contribute to Review Radar locally today, start with the [repository README](https://github.com/RossBossDev/opentoast#readme) instead of this page.
+If you are trying to run or contribute to Review Radar locally today, start with the [repository README](https://github.com/RossBossDev/review-radar#readme) instead of this page.

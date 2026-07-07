@@ -6,7 +6,7 @@ import { KYSELY_DB } from "../src/database/database.tokens";
 
 process.env.NODE_ENV = "test";
 process.env.DATABASE_URL =
-	"postgres://postgres:postgres@localhost:5432/opentoast";
+	"postgres://postgres:postgres@localhost:5432/review-radar";
 process.env.APP_BASE_URL = "http://localhost:3000";
 process.env.GITHUB_APP_ID = "123";
 process.env.GITHUB_WEBHOOK_SECRET = "secret";

@@ -11,7 +11,7 @@ function sign(body: string, timestamp: string, secret: string): string {
 describe("SlackSignatureVerifier", () => {
 	const verifier = new SlackSignatureVerifier();
 	const body =
-		"token=legacy&team_id=T123&user_id=U123&command=%2Fopentoast&text=help";
+		"token=legacy&team_id=T123&user_id=U123&command=%2Freview-radar&text=help";
 	const timestamp = "1700000000";
 	const now = new Date(Number(timestamp) * 1000);
 

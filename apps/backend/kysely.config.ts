@@ -7,7 +7,7 @@ export default defineConfig({
 		pool: new Pool({
 			connectionString:
 				process.env.DATABASE_URL ??
-				"postgres://postgres:postgres@localhost:5432/opentoast",
+				"postgres://postgres:postgres@localhost:5432/review-radar",
 		}),
 	},
 	migrations: {

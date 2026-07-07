@@ -4,13 +4,13 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: opentoast
+      POSTGRES_DB: review-radar
     ports:
       - "${POSTGRES_PORT:-5432}:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d opentoast"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d review-radar"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -20,7 +20,7 @@ services:
     env_file:
       - apps/backend/.env.example
     environment:
-      DATABASE_URL: postgres://postgres:postgres@postgres:5432/opentoast
+      DATABASE_URL: postgres://postgres:postgres@postgres:5432/review-radar
     ports:
       - "3000:3000"
     depends_on:
@@ -33,7 +33,7 @@ services:
     env_file:
       - apps/backend/.env.example
     environment:
-      DATABASE_URL: postgres://postgres:postgres@postgres:5432/opentoast
+      DATABASE_URL: postgres://postgres:postgres@postgres:5432/review-radar
     depends_on:
       postgres:
         condition: service_healthy

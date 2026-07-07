@@ -2,7 +2,7 @@
 
 Review Radar is a NestJS API and worker service for tracking GitHub pull request attention and delivering Slack reminders/digests.
 
-Product documentation: https://rossbossdev.github.io/opentoast/
+Product documentation: https://rossbossdev.github.io/review-radar/
 
 ## Prerequisites
 
@@ -85,7 +85,7 @@ docker compose up --build
 Build the production image:
 
 ```bash
-docker build -t opentoast .
+docker build -t review-radar .
 ```
 
 Migrations should run as an explicit release/deploy step before starting API or worker containers.

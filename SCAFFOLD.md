@@ -2,7 +2,7 @@
 
 This project was generated using the Ross Nest Scaffold skill with the following information.
 
-- Project name: `opentoast`
+- Project name: `review-radar`
 - Scaffold date: 2026-07-05
 - Node version: `v24.18.0`
 - pnpm version: `11.10.0`
