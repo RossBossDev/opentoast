@@ -15,28 +15,62 @@ services:
       timeout: 5s
       retries: 10
 
+  redis:
+    image: valkey/valkey:8-alpine
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
   api:
     build: .
     env_file:
       - apps/backend/.env.example
     environment:
+      PROCESS_ROLE: api
       DATABASE_URL: postgres://postgres:postgres@postgres:5432/review-radar
+      REDIS_URL: redis://redis:6379
     ports:
       - "3000:3000"
     depends_on:
       postgres:
         condition: service_healthy
+      redis:
+        condition: service_healthy
 
   worker:
     build: .
-    command: ["node", "dist/src/worker.js"]
     env_file:
       - apps/backend/.env.example
     environment:
+      PROCESS_ROLE: worker
       DATABASE_URL: postgres://postgres:postgres@postgres:5432/review-radar
+      REDIS_URL: redis://redis:6379
     depends_on:
       postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  heartbeat:
+    build: .
+    env_file:
+      - apps/backend/.env.example
+    environment:
+      PROCESS_ROLE: heartbeat
+      DATABASE_URL: postgres://postgres:postgres@postgres:5432/review-radar
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
         condition: service_healthy
 
 volumes:
   postgres-data:
+  redis-data:

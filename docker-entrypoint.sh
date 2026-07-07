@@ -5,7 +5,7 @@ should_run_migrations="${RUN_MIGRATIONS:-}"
 
 if [ -z "$should_run_migrations" ]; then
 	case "$*" in
-		"node dist/src/main.js"|"node dist/src/worker.js") should_run_migrations="true" ;;
+		"node dist/src/main.js") should_run_migrations="true" ;;
 		*) should_run_migrations="false" ;;
 	esac
 fi

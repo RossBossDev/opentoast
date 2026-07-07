@@ -1,6 +1,5 @@
 import { EventEmitter } from "node:events";
-import { Inject, Injectable, Optional } from "@nestjs/common";
-import { AttentionEngineService } from "../attention/attention-engine.service";
+import { Inject, Injectable } from "@nestjs/common";
 import type {
 	GithubIngestionResult,
 	GithubNormalizedFact,
@@ -8,8 +7,7 @@ import type {
 	GithubWebhookPayload,
 } from "./github.types";
 import { GithubEventStore } from "./github-event-store";
-import { GithubNormalizer } from "./github-normalizer";
-import { GithubPrSnapshotService } from "./github-pr-snapshot.service";
+import { GithubJobsProducer } from "./github-jobs.producer";
 
 export const GITHUB_FACTS_EVENT = "github.facts";
 
@@ -20,13 +18,8 @@ export class GithubIngestionService {
 	constructor(
 		@Inject(GithubEventStore)
 		private readonly eventStore: GithubEventStore,
-		@Inject(GithubPrSnapshotService)
-		private readonly snapshots: GithubPrSnapshotService,
-		@Inject(GithubNormalizer)
-		private readonly normalizer: GithubNormalizer,
-		@Optional()
-		@Inject(AttentionEngineService)
-		private readonly attention?: AttentionEngineService,
+		@Inject(GithubJobsProducer)
+		private readonly jobs: GithubJobsProducer,
 	) {}
 
 	async ingest(
@@ -43,33 +36,16 @@ export class GithubIngestionService {
 			return { deliveryId: headers.deliveryId, duplicate: true, facts: [] };
 		}
 
-		const snapshot = await this.snapshots.upsertFromPayload(payload);
-		const facts = this.normalizer.normalize({
-			deliveryId: headers.deliveryId,
-			eventName: headers.eventName,
-			payload,
-		});
-
-		await this.eventStore.markProcessed({
+		await this.jobs.enqueueProcessWebhookEvent({
 			eventId: stored.id,
-			installationId: snapshot.installationId,
-			repositoryId: snapshot.repositoryId,
+			deliveryId: headers.deliveryId,
 		});
 
-		await this.attention?.processFacts(facts);
-		this.publishFacts(facts);
-
-		return { deliveryId: headers.deliveryId, duplicate: false, facts };
+		return { deliveryId: headers.deliveryId, duplicate: false, facts: [] };
 	}
 
 	onFacts(listener: (facts: GithubNormalizedFact[]) => void): () => void {
 		this.events.on(GITHUB_FACTS_EVENT, listener);
 		return () => this.events.off(GITHUB_FACTS_EVENT, listener);
-	}
-
-	private publishFacts(facts: GithubNormalizedFact[]): void {
-		if (facts.length > 0) {
-			this.events.emit(GITHUB_FACTS_EVENT, facts);
-		}
 	}
 }

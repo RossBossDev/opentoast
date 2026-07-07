@@ -12,6 +12,14 @@ export interface StoredGithubEvent {
 	duplicate: boolean;
 }
 
+export interface PersistedGithubEvent {
+	id: string;
+	deliveryId: string;
+	eventName: GithubWebhookEventName;
+	payload: GithubWebhookPayload;
+	processedAt: Date | null;
+}
+
 @Injectable()
 export class GithubEventStore {
 	constructor(@Inject(KYSELY_DB) private readonly db: Kysely<Database>) {}
@@ -43,6 +51,32 @@ export class GithubEventStore {
 			.executeTakeFirstOrThrow();
 
 		return { id: existing.id, duplicate: true };
+	}
+
+	async findById(eventId: string): Promise<PersistedGithubEvent | undefined> {
+		const row = await this.db
+			.selectFrom("github_events")
+			.select([
+				"id",
+				"github_delivery_id as deliveryId",
+				"event_name as eventName",
+				"payload",
+				"processed_at as processedAt",
+			])
+			.where("id", "=", eventId)
+			.executeTakeFirst();
+
+		if (!row) {
+			return undefined;
+		}
+
+		return {
+			id: row.id,
+			deliveryId: row.deliveryId,
+			eventName: row.eventName as GithubWebhookEventName,
+			payload: row.payload as GithubWebhookPayload,
+			processedAt: row.processedAt,
+		};
 	}
 
 	async markProcessed(params: {

@@ -16,7 +16,7 @@ Review Radar does not yet have hosted signup. The steps below assume you are run
 
 ## 1. Run the backend
 
-Review Radar needs a URL that GitHub and Slack can call. For local setup, start the API on port `3000` and expose it with a tunnel such as ngrok or Cloudflare Tunnel.
+Review Radar needs a URL that GitHub and Slack can call. For local setup, start the API on port `3000` and expose it with a tunnel such as ngrok or Cloudflare Tunnel. For a deployed setup, use the deployed API URL, for example `https://review-radar.rossboss.dev`.
 
 Use these callback URLs, replacing `<base-url>` with your public HTTPS URL:
 
@@ -28,7 +28,7 @@ Use these callback URLs, replacing `<base-url>` with your public HTTPS URL:
 | Slack interactivity | `<base-url>/slack/interactions` |
 | Readiness check | `<base-url>/health/ready` |
 
-Set `APP_BASE_URL=<base-url>` in `apps/backend/.env`.
+Set `APP_BASE_URL=<base-url>` in `apps/backend/.env` or in your deployment environment.
 
 Local bootstrap commands:
 
@@ -42,6 +42,30 @@ pnpm dev
 ```
 
 If you use a non-default Postgres port, update `DATABASE_URL` in `apps/backend/.env` to match it, for example `postgres://postgres:postgres@localhost:5433/review-radar`.
+
+### Run the worker
+
+The API and worker use the same build artifact and Docker image. Run one web process for the API and one worker process with the same environment variables and database connection.
+
+API command:
+
+```bash
+node dist/src/main.js
+```
+
+Worker command:
+
+```bash
+node dist/src/worker.js
+```
+
+For Docker-based deployments, use the same image and override the worker command:
+
+```bash
+docker run --env-file apps/backend/.env review-radar node dist/src/worker.js
+```
+
+Run only one worker replica until Review Radar has distributed job locking. Prefer running migrations as a separate release step; if your API service already runs migrations, set `RUN_MIGRATIONS=false` on the worker to avoid duplicate migration attempts during deploys.
 
 ## 2. Connect GitHub
 

@@ -26,12 +26,12 @@ cp apps/backend/.env.example apps/backend/.env
 
 Fill in GitHub App and Slack secrets before using real integrations.
 
-## Local database
+## Local services
 
-Start Postgres:
+Start Postgres and Redis/Valkey:
 
 ```bash
-docker compose up -d postgres
+docker compose up -d postgres redis
 ```
 
 Run migrations:
@@ -48,10 +48,25 @@ pnpm db:migrate:list
 
 ## Development
 
-Start the API:
+`PROCESS_ROLE` controls which responsibilities a backend process runs:
+
+- `all` — HTTP API, BullMQ processors, and heartbeat scheduling. Default for local dev.
+- `api` — HTTP API and queue producers only.
+- `worker` — BullMQ processors only; no HTTP listener.
+- `heartbeat` — scheduled enqueueing only; no HTTP listener or processors.
+
+Start the local all-in-one process:
 
 ```bash
 pnpm dev
+```
+
+Run split production-style roles:
+
+```bash
+PROCESS_ROLE=api pnpm --filter backend start:prod
+PROCESS_ROLE=worker pnpm --filter backend start:worker
+PROCESS_ROLE=heartbeat pnpm --filter backend start:prod
 ```
 
 Health endpoints:
@@ -88,4 +103,4 @@ Build the production image:
 docker build -t review-radar .
 ```
 
-Migrations should run as an explicit release/deploy step before starting API or worker containers.
+Migrations should run as an explicit release/deploy step before starting API, worker, or heartbeat containers.
