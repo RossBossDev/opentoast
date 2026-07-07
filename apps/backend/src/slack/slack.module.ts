@@ -6,6 +6,7 @@ import { hasWorkers, resolveProcessRole } from "../queue/process-role";
 import { QueueModule } from "../queue/queue.module";
 import { SlackController } from "./slack.controller";
 import { SlackCommandsService } from "./slack-commands.service";
+import { SlackDebugExamplesService } from "./slack-debug-examples.service";
 import { SlackDeliveryService } from "./slack-delivery.service";
 import { SlackHomeService } from "./slack-home.service";
 import { SlackHttpClient } from "./slack-http-client";
@@ -26,6 +27,7 @@ const processRole = resolveProcessRole(process.env.PROCESS_ROLE);
 		SlackMessageBuilder,
 		DigestBuilder,
 		SlackCommandsService,
+		SlackDebugExamplesService,
 		SlackDeliveryService,
 		SlackHomeService,
 		SlackHttpClient,

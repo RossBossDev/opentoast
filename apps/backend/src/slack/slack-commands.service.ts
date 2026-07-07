@@ -1,6 +1,7 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { AttentionRepository } from "../attention/attention-repository";
 import type { SlackCommandPayload } from "./slack.types";
+import { SlackDebugExamplesService } from "./slack-debug-examples.service";
 import { SlackMessageBuilder } from "./slack-message-builder";
 import { SlackUserLinkService } from "./slack-user-link.service";
 
@@ -16,20 +17,24 @@ export class SlackCommandsService {
 		@Inject(AttentionRepository)
 		private readonly attention: AttentionRepository,
 		@Inject(SlackMessageBuilder) private readonly messages: SlackMessageBuilder,
+		@Inject(SlackDebugExamplesService)
+		private readonly debugExamples: SlackDebugExamplesService,
 	) {}
 
 	async handle(command: SlackCommandPayload): Promise<SlackCommandResponse> {
-		const [subcommand = "help", arg] = (command.text ?? "")
+		const [subcommand = "help", ...args] = (command.text ?? "")
 			.trim()
-			.split(/\s+/, 2);
+			.split(/\s+/);
 
 		switch (subcommand.toLowerCase()) {
 			case "link":
-				return this.link(command, arg);
+				return this.link(command, args[0]);
 			case "unlink":
 				return this.unlink(command);
 			case "inbox":
 				return this.inbox(command);
+			case "debug":
+				return this.debug(command, args);
 			case "help":
 			case "":
 				return { response_type: "ephemeral", text: this.helpText() };
@@ -87,6 +92,26 @@ export class SlackCommandsService {
 		return {
 			response_type: "ephemeral",
 			text: this.messages.buildInboxText(items),
+		};
+	}
+
+	private async debug(
+		command: SlackCommandPayload,
+		args: string[],
+	): Promise<SlackCommandResponse> {
+		if (args[0]?.toLowerCase() !== "examples") {
+			return {
+				response_type: "ephemeral",
+				text: "Usage: /review-radar debug examples",
+			};
+		}
+
+		const sentCount = await this.debugExamples.sendExamplesToSlackUser(
+			command.user_id,
+		);
+		return {
+			response_type: "ephemeral",
+			text: `Sent ${sentCount} example Review Radar messages to you.`,
 		};
 	}
 
