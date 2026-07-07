@@ -26,6 +26,7 @@ describe("SlackCommandsService", () => {
 			links as never,
 			{} as never,
 			new SlackMessageBuilder(),
+			{} as never,
 		);
 
 		const response = await service.handle({
@@ -46,6 +47,7 @@ describe("SlackCommandsService", () => {
 			links as never,
 			{} as never,
 			new SlackMessageBuilder(),
+			{} as never,
 		);
 
 		const response = await service.handle({ ...baseCommand, text: "unlink" });
@@ -82,11 +84,56 @@ describe("SlackCommandsService", () => {
 			links as never,
 			attention as never,
 			new SlackMessageBuilder(),
+			{} as never,
 		);
 
 		const response = await service.handle({ ...baseCommand, text: "inbox" });
 
 		expect(attention.listActiveByGithubUser).toHaveBeenCalledWith("octocat");
 		expect(response.text).toContain("Review requested");
+	});
+
+	it("sends debug example messages to the invoking Slack user", async () => {
+		const debugExamples = {
+			sendExamplesToSlackUser: vi.fn().mockResolvedValue(3),
+		};
+		const service = new SlackCommandsService(
+			{} as never,
+			{} as never,
+			new SlackMessageBuilder(),
+			debugExamples as never,
+		);
+
+		const response = await service.handle({
+			...baseCommand,
+			text: "debug examples",
+		});
+
+		expect(debugExamples.sendExamplesToSlackUser).toHaveBeenCalledWith("U123");
+		expect(response).toEqual({
+			response_type: "ephemeral",
+			text: "Sent 3 example Review Radar messages to you.",
+		});
+	});
+
+	it("shows debug usage for unknown debug subcommands", async () => {
+		const debugExamples = { sendExamplesToSlackUser: vi.fn() };
+		const service = new SlackCommandsService(
+			{} as never,
+			{} as never,
+			new SlackMessageBuilder(),
+			debugExamples as never,
+		);
+
+		const response = await service.handle({
+			...baseCommand,
+			text: "debug nope",
+		});
+
+		expect(debugExamples.sendExamplesToSlackUser).not.toHaveBeenCalled();
+		expect(response).toEqual({
+			response_type: "ephemeral",
+			text: "Usage: /review-radar debug examples",
+		});
 	});
 });
