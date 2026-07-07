@@ -56,12 +56,25 @@ export class AppConfig {
 
 	@IsString()
 	@IsNotEmpty()
-	DIGEST_CRON!: string;
+	DIGEST_CRON = "0 9 * * 1-5";
+
+	@IsOptional()
+	@IsString()
+	DIGEST_TIMEZONE?: string;
+
+	@IsString()
+	@IsNotEmpty()
+	REMINDER_CRON = "0 * * * *";
 
 	@Transform(({ value }) => Number(value ?? 24))
 	@IsInt()
 	@Min(1)
 	STALE_REVIEW_DURATION_HOURS = 24;
+
+	@Transform(({ value }) => Number(value ?? 24))
+	@IsInt()
+	@Min(1)
+	REMINDER_COOLDOWN_HOURS = 24;
 
 	@IsOptional()
 	@IsString()

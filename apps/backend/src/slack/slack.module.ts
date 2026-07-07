@@ -1,6 +1,7 @@
 import { Module } from "@nestjs/common";
 import { AttentionModule } from "../attention/attention.module";
 import { DatabaseModule } from "../database/database.module";
+import { DigestBuilder } from "../notifications/digest-builder";
 import { hasWorkers, resolveProcessRole } from "../queue/process-role";
 import { QueueModule } from "../queue/queue.module";
 import { SlackController } from "./slack.controller";
@@ -23,6 +24,7 @@ const processRole = resolveProcessRole(process.env.PROCESS_ROLE);
 		SlackSignatureVerifier,
 		SlackUserLinkService,
 		SlackMessageBuilder,
+		DigestBuilder,
 		SlackCommandsService,
 		SlackDeliveryService,
 		SlackHomeService,
@@ -30,6 +32,11 @@ const processRole = resolveProcessRole(process.env.PROCESS_ROLE);
 		SlackJobsProducer,
 		...(hasWorkers(processRole) ? [SlackJobsProcessor] : []),
 	],
-	exports: [SlackDeliveryService, SlackJobsProducer, SlackUserLinkService],
+	exports: [
+		DigestBuilder,
+		SlackDeliveryService,
+		SlackJobsProducer,
+		SlackUserLinkService,
+	],
 })
 export class SlackModule {}

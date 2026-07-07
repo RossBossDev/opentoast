@@ -14,7 +14,10 @@ const validConfig = {
 	SLACK_SIGNING_SECRET: "secret",
 	SLACK_BOT_TOKEN: "xoxb-token",
 	DIGEST_CRON: "0 9 * * 1-5",
+	DIGEST_TIMEZONE: "UTC",
+	REMINDER_CRON: "0 * * * *",
 	STALE_REVIEW_DURATION_HOURS: "24",
+	REMINDER_COOLDOWN_HOURS: "24",
 	LOG_LEVEL: "silent",
 };
 
@@ -26,6 +29,7 @@ describe("config validation", () => {
 			REDIS_URL: validConfig.REDIS_URL,
 			PORT: 3000,
 			STALE_REVIEW_DURATION_HOURS: 24,
+			REMINDER_COOLDOWN_HOURS: 24,
 		});
 	});
 

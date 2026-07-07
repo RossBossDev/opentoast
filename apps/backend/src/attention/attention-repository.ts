@@ -5,11 +5,13 @@ import type { Database } from "../database/database.types";
 import type { GithubNormalizedFact } from "../github/github.types";
 import {
 	AttentionCategory,
+	type AttentionDigestDeliveryItem,
 	type AttentionDigestGroup,
 	type AttentionFactContext,
 	type AttentionQueryItem,
 	type AttentionRepositoryUpsert,
 	AttentionStatus,
+	type StaleReminderCandidate,
 } from "./attention.types";
 
 @Injectable()
@@ -191,30 +193,102 @@ export class AttentionRepository {
 
 	async listDigestGroupsByGithubUser(): Promise<AttentionDigestGroup[]> {
 		const rows = await this.baseQuery()
+			.innerJoin(
+				"pull_requests as pr",
+				"pr.id",
+				"attention_items.pull_request_id",
+			)
+			.innerJoin("github_repositories as repo", "repo.id", "pr.repository_id")
+			.innerJoin(
+				"slack_users as su",
+				"su.github_login",
+				"attention_items.assignee_github_login",
+			)
+			.select([
+				"repo.full_name as repositoryFullName",
+				"pr.number as pullRequestNumber",
+				"pr.title as pullRequestTitle",
+				"pr.html_url as pullRequestUrl",
+			])
 			.where("attention_items.status", "in", [
 				AttentionStatus.Active,
 				AttentionStatus.Waiting,
 			])
 			.where("attention_items.assignee_github_login", "is not", null)
+			.where("su.github_login", "is not", null)
+			.where("pr.state", "=", "open")
 			.orderBy("attention_items.assignee_github_login", "asc")
 			.orderBy("attention_items.last_relevant_activity_at", "desc")
 			.execute();
 
-		const groups = new Map<string, AttentionQueryItem[]>();
+		const groups = new Map<string, AttentionDigestDeliveryItem[]>();
+		const seenItemIds = new Set<string>();
 		for (const row of rows) {
 			const login = row.assigneeLogin;
-			if (!login) {
+			if (!login || seenItemIds.has(row.id)) {
 				continue;
 			}
+			seenItemIds.add(row.id);
 			groups.set(login, [
 				...(groups.get(login) ?? []),
-				toAttentionQueryItem(row),
+				{
+					...toAttentionQueryItem(row),
+					repositoryFullName: row.repositoryFullName,
+					pullRequestNumber: row.pullRequestNumber,
+					pullRequestTitle: row.pullRequestTitle,
+					pullRequestUrl: row.pullRequestUrl,
+				},
 			]);
 		}
 
 		return [...groups.entries()].map(([githubUserLogin, items]) => ({
 			githubUserLogin,
 			items,
+		}));
+	}
+
+	async listStaleReminderCandidates(): Promise<StaleReminderCandidate[]> {
+		const rows = await this.baseQuery()
+			.innerJoin(
+				"pull_requests as pr",
+				"pr.id",
+				"attention_items.pull_request_id",
+			)
+			.innerJoin(
+				"slack_users as su",
+				"su.github_login",
+				"attention_items.assignee_github_login",
+			)
+			.select([
+				"pr.state as pullRequestState",
+				"pr.draft as pullRequestDraft",
+				sql<Date | null>`max(deliveries.delivered_at)`.as(
+					"lastReminderDeliveredAt",
+				),
+			])
+			.leftJoin("deliveries", (join) =>
+				join
+					.onRef("deliveries.attention_item_id", "=", "attention_items.id")
+					.on("deliveries.delivery_type", "=", "stale_reminder")
+					.on("deliveries.status", "=", "delivered"),
+			)
+			.where(
+				"attention_items.attention_type",
+				"=",
+				AttentionCategory.NeedsReview,
+			)
+			.where("attention_items.status", "=", AttentionStatus.Active)
+			.where("attention_items.resolved_at", "is", null)
+			.where("su.github_login", "is not", null)
+			.groupBy(["attention_items.id", "pr.state", "pr.draft"])
+			.orderBy("attention_items.last_relevant_activity_at", "asc")
+			.execute();
+
+		return rows.map((row) => ({
+			...toAttentionQueryItem(row),
+			pullRequestState: row.pullRequestState,
+			pullRequestDraft: row.pullRequestDraft,
+			lastReminderDeliveredAt: row.lastReminderDeliveredAt,
 		}));
 	}
 

@@ -8,8 +8,6 @@ import type {
 	DeliverAttentionItemJob,
 	SendDigestJob,
 } from "./slack-jobs.producer";
-import { SlackJobsProducer } from "./slack-jobs.producer";
-
 @Processor(SLACK_QUEUE)
 export class SlackJobsProcessor extends WorkerHost {
 	constructor(
@@ -17,8 +15,6 @@ export class SlackJobsProcessor extends WorkerHost {
 		private readonly attention: AttentionRepository,
 		@Inject(SlackDeliveryService)
 		private readonly delivery: SlackDeliveryService,
-		@Inject(SlackJobsProducer)
-		private readonly producer: SlackJobsProducer,
 	) {
 		super();
 	}
@@ -51,17 +47,21 @@ export class SlackJobsProcessor extends WorkerHost {
 		}
 	}
 
-	private async sendDigest(_job: Job<SendDigestJob>): Promise<void> {
+	private async sendDigest(job: Job<SendDigestJob>): Promise<void> {
+		await this.refreshPullRequestStateBeforeDigest();
 		const groups = await this.attention.listDigestGroupsByGithubUser();
 		await Promise.all(
-			groups.flatMap((group) =>
-				group.items.map((item) =>
-					this.producer.enqueueDeliverAttentionItem({
-						attentionItemId: item.id,
-						deliveryType: "digest",
-					}),
-				),
+			groups.map((group) =>
+				this.delivery.deliverDigest({
+					githubUserLogin: group.githubUserLogin,
+					items: group.items,
+					bucket: job.data.bucket,
+				}),
 			),
 		);
+	}
+
+	private async refreshPullRequestStateBeforeDigest(): Promise<void> {
+		// Future hook: reconcile open PR snapshots before reading attention state.
 	}
 }
