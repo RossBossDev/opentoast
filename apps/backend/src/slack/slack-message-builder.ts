@@ -43,7 +43,7 @@ export class SlackMessageBuilder {
 
 	buildInboxText(items: AttentionQueryItem[]): string {
 		if (items.length === 0) {
-			return "Your OpenToast inbox is empty.";
+			return "Your Review Radar inbox is empty.";
 		}
 		return items
 			.map((item) => `• ${this.labelFor(item.category)} — ${item.reason}`)
@@ -66,7 +66,7 @@ export class SlackMessageBuilder {
 			blocks: [
 				{
 					type: "header",
-					text: { type: "plain_text", text: "OpenToast Inbox" },
+					text: { type: "plain_text", text: "Review Radar Inbox" },
 				},
 				...blocks,
 			],

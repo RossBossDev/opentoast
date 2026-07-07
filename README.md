@@ -1,6 +1,6 @@
-# OpenToast
+# Review Radar
 
-OpenToast is a NestJS API and worker service for tracking GitHub pull request attention and delivering Slack reminders/digests.
+Review Radar is a NestJS API and worker service for tracking GitHub pull request attention and delivering Slack reminders/digests.
 
 Product documentation: https://rossbossdev.github.io/opentoast/
 

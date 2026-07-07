@@ -7,7 +7,7 @@ async function bootstrapWorker() {
 		bufferLogs: true,
 	});
 	app.useLogger(app.get(Logger));
-	app.get(Logger).log("OpenToast worker started");
+	app.get(Logger).log("Review Radar worker started");
 
 	const keepAlive = setInterval(() => undefined, 60_000);
 	await new Promise<void>((resolve) => {

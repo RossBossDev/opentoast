@@ -17,7 +17,7 @@ const validConfig = {
 };
 
 describe("config validation", () => {
-	it("accepts required OpenToast environment values", () => {
+	it("accepts required Review Radar environment values", () => {
 		expect(validate(validConfig)).toMatchObject({
 			DATABASE_URL: validConfig.DATABASE_URL,
 			PORT: 3000,

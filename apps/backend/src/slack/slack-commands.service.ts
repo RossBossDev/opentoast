@@ -65,8 +65,8 @@ export class SlackCommandsService {
 		return {
 			response_type: "ephemeral",
 			text: removed
-				? "Your OpenToast GitHub link was removed."
-				: "No OpenToast link was found for your Slack user.",
+				? "Your Review Radar GitHub link was removed."
+				: "No Review Radar link was found for your Slack user.",
 		};
 	}
 
@@ -92,7 +92,7 @@ export class SlackCommandsService {
 
 	private helpText(): string {
 		return [
-			"OpenToast commands:",
+			"Review Radar commands:",
 			"/opentoast link <github-login> — link your Slack user to GitHub",
 			"/opentoast unlink — remove your link",
 			"/opentoast inbox — show active attention items",

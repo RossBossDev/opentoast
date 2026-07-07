@@ -2,10 +2,11 @@ import { defineConfig } from "vitepress";
 
 export default defineConfig({
 	base: "/opentoast/",
-	title: "OpenToast",
-	description:
-		"A personal pull request attention assistant for GitHub and Slack.",
-	head: [["link", { rel: "icon", href: "/opentoast/favicon.ico" }]],
+	title: "Review Radar",
+	description: "Spot what needs your attention in GitHub pull requests.",
+	head: [
+		["link", { rel: "icon", href: "/opentoast/brand/review-radar-icon.svg" }],
+	],
 	themeConfig: {
 		nav: [
 			{ text: "Getting Started", link: "/getting-started" },
@@ -36,7 +37,7 @@ export default defineConfig({
 			text: "Edit this page on GitHub",
 		},
 		footer: {
-			message: "OpenToast product documentation.",
+			message: "Review Radar product documentation.",
 		},
 	},
 });

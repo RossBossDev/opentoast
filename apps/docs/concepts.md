@@ -1,6 +1,6 @@
 # Concepts
 
-OpenToast uses a small product vocabulary for pull request attention and delivery.
+Review Radar uses a small product vocabulary for pull request attention and delivery.
 
 ## Attention Item
 
@@ -12,7 +12,7 @@ The goal is not to mirror every GitHub notification. The goal is to identify act
 
 A personal inbox is the set of attention items currently relevant to one person.
 
-OpenToast is designed around the idea that each developer needs a focused view of "what needs me now" rather than a shared wall of repository activity.
+Review Radar is designed around the idea that each developer needs a focused view of "what needs me now" rather than a shared wall of repository activity.
 
 ## Digest
 
@@ -28,6 +28,6 @@ Reminders are intended to be useful, not noisy. They should point to pull reques
 
 ## Delivery
 
-Delivery is how OpenToast sends digests and reminders to users.
+Delivery is how Review Radar sends digests and reminders to users.
 
-The first product direction is Slack delivery, so OpenToast can surface pull request attention where teams already coordinate work.
+The first product direction is Slack delivery, so Review Radar can surface pull request attention where teams already coordinate work.

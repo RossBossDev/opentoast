@@ -33,7 +33,9 @@ describe("SlackMessageBuilder", () => {
 	});
 
 	it("formats an empty inbox", () => {
-		expect(builder.buildInboxText([])).toBe("Your OpenToast inbox is empty.");
+		expect(builder.buildInboxText([])).toBe(
+			"Your Review Radar inbox is empty.",
+		);
 	});
 
 	it("formats inbox items", () => {
