@@ -18,6 +18,9 @@ RUN pnpm --filter backend build
 FROM node:24-alpine AS runtime
 ENV NODE_ENV=production
 WORKDIR /app/apps/backend
+RUN apk add --no-cache curl \
+	&& curl -1sLf 'https://artifacts-cli.infisical.com/setup.apk.sh' | sh \
+	&& apk add --no-cache infisical
 COPY --from=build /app/node_modules /app/node_modules
 COPY --from=build /app/apps/backend/node_modules ./node_modules
 COPY --from=build /app/apps/backend/dist ./dist
