@@ -19,7 +19,6 @@ if [ -z "${INFISICAL_SECRETS_LOADED:-}" ]; then
 			--token="$infisical_token" \
 			--projectId="$INFISICAL_PROJECT_ID" \
 			--env="${INFISICAL_ENVIRONMENT:-${INFISICAL_ENV:-production}}" \
-			--path="${INFISICAL_SECRET_PATH:-${INFISICAL_PATH:-/review-radar}}" \
 			-- "$0" "$@"
 	fi
 
